@@ -1,7 +1,11 @@
-from .tui import run
+from src.db.tui import StudentUI
+
 
 def main():
-    run()
+    """Запуск приложения."""
+    ui = StudentUI()
+    ui.run()
+
 
 if __name__ == "__main__":
     main()

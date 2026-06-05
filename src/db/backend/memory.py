@@ -1,76 +1,96 @@
-type StudentRecord = tuple[int, str, int, str]
+from .errors import DuplicateIDError, InvalidAgeError, RecordNotFoundError
 
-students: list[StudentRecord] = []
+type StudentRecord = tuple[int, str, str, int, str]
 
-next_id = 1
 
-def create_record(name: str, age: int, group: str) -> StudentRecord:
+class StudentTable:
 
-    global next_id
-    
-    if age < 0 or age > 120:
-        raise ValueError("Возраст должен быть от 0 до 120")
-    
-    if not name or not name.strip():
-        raise ValueError("Имя не может быть пустым")
-    
-    new_record = (next_id, name.strip(), age, group.strip())
-    
-    students.append(new_record)
-    
-    next_id += 1
-    
-    return new_record
+    def __init__(self) -> None:
+        self._students: list[StudentRecord] = []
 
-def select_record(
-    student_id: int | None = None,
-    name: str | None = None,
-    age: int | None = None,
-    group: str | None = None
-) -> list[StudentRecord]:
+    def create_record(
+        self,
+        student_id: int,
+        first_name: str,
+        second_name: str,
+        age: int,
+        sex: str,
+    ) -> StudentRecord:
+        if age < 0:
+            raise InvalidAgeError("Поле age не может быть отрицательным.")
 
-    if student_id is None and name is None and age is None and group is None:
-        return students.copy()
-    
-    result = []
+        if any(record[0] == student_id for record in self._students):
+            raise DuplicateIDError(f"Запись с id={student_id} уже существует.")
 
-    for record in students:
-        if student_id is not None and record[0] != student_id:
-            continue
-        if name is not None and record[1] != name:
-            continue
-        if age is not None and record[2] != age:
-            continue
-        if group is not None and record[3] != group:
-            continue
-        
-        result.append(record)
-    
-    return result
+        new_record: StudentRecord = (
+            student_id,
+            first_name.strip(),
+            second_name.strip(),
+            age,
+            sex.strip(),
+        )
+        self._students.append(new_record)
+        return new_record
 
-def update_record(
-    student_id: int,
-    name: str | None = None,
-    age: int | None = None,
-    group: str | None = None
-) -> StudentRecord:
+    def select_record(
+        self,
+        student_id: int | None = None,
+        first_name: str | None = None,
+        second_name: str | None = None,
+        age: int | None = None,
+        sex: str | None = None,
+    ) -> list[StudentRecord]:
+        if all(param is None for param in [student_id, first_name, second_name, age, sex]):
+            return self._students.copy()
 
-    for i, record in enumerate(students):
-        if record[0] == student_id:
-            new_record = (
-                record[0],
-                name if name is not None else record[1],
-                age if age is not None else record[2],
-                group if group is not None else record[3]
-            )
-            students[i] = new_record
-            return new_record
-    
-    raise ValueError(f"Студент с ID {student_id} не найден")
+        result: list[StudentRecord] = []
 
-def delete_record(student_id: int) -> StudentRecord:
-    for i, record in enumerate(students):
-        if record[0] == student_id:
-            return students.pop(i)
-    
-    raise ValueError(f"Студент с ID {student_id} не найден")
+        for record in self._students:
+            if student_id is not None and record[0] != student_id:
+                continue
+            if first_name is not None and record[1] != first_name:
+                continue
+            if second_name is not None and record[2] != second_name:
+                continue
+            if age is not None and record[3] != age:
+                continue
+            if sex is not None and record[4] != sex:
+                continue
+            result.append(record)
+
+        return result
+
+    def update_record(
+        self,
+        student_id: int,
+        first_name: str | None = None,
+        second_name: str | None = None,
+        age: int | None = None,
+        sex: str | None = None,
+    ) -> StudentRecord:
+        for i, record in enumerate(self._students):
+            if record[0] == student_id:
+                new_record: StudentRecord = (
+                    student_id,
+                    first_name.strip() if first_name is not None else record[1],
+                    second_name.strip() if second_name is not None else record[2],
+                    age if age is not None else record[3],
+                    sex.strip() if sex is not None else record[4],
+                )
+                self._students[i] = new_record
+                return new_record
+
+        raise RecordNotFoundError(f"Запись с id={student_id} не найдена.")
+
+    def delete_record(self, student_id: int) -> StudentRecord:
+        for i, record in enumerate(self._students):
+            if record[0] == student_id:
+                return self._students.pop(i)
+
+        raise RecordNotFoundError(f"Запись с id={student_id} не найдена.")
+
+    def get_all_records(self) -> list[StudentRecord]:
+        return self._students.copy()
+
+    def count_records(self) -> int:
+        return len(self._students)
