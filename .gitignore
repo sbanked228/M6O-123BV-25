@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.coverage
+.coverage.*
+htmlcov/
+.coverage.xml
+venv/
+env/
+.venv/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

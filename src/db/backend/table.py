@@ -1,6 +1,6 @@
 from typing import Any
 
-from .errors import MissingColumnError, UnknownColumnError
+from .errors import MissingColumnError, UnknownColumnError, InvalidAgeError
 
 
 class Table:
@@ -14,6 +14,11 @@ class Table:
                 self.insert_record(record)
 
     def insert_record(self, record: dict[str, Any]) -> None:
+        if "age" in self.columns and "age" in record:
+            age = record["age"]
+            if not isinstance(age, int) or age < 0 or age > 120:
+                raise InvalidAgeError(f"Некорректный возраст: {age}. Должен быть от 0 до 120.")    
+            
         missing_columns = [column for column in self.columns if column not in record]
         if missing_columns:
             raise MissingColumnError(

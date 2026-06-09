@@ -1,14 +1,10 @@
 from src.db.backend.file import FileDatabase
 from src.db.backend.memory import MemoryDatabase
 from src.db.backend.errors import (
-    TableAlreadyExistsError,
     TableNotFoundError,
     MissingColumnError,
     UnknownColumnError,
-    InvalidStorageDataError,
     InvalidAgeError,
-    DuplicateIDError,
-    RecordNotFoundError,
 )
 
 
@@ -113,10 +109,6 @@ class StudentUI:
         age = self._read_int("Возраст: ")
         sex = input("Пол (M/F): ").strip().upper()
 
-        if age < 0 or age > 120:
-            print("Ошибка: возраст должен быть от 0 до 120.")
-            return
-
         if sex not in ("M", "F"):
             print("Ошибка: пол должен быть M или F.")
             return
@@ -134,7 +126,7 @@ class StudentUI:
             )
             self.next_id += 1
             print(f"Студент добавлен! ID = {student_id}")
-        except (MissingColumnError, UnknownColumnError, TableNotFoundError) as e:
+        except (MissingColumnError, UnknownColumnError, TableNotFoundError, InvalidAgeError) as e:
             print(f"Ошибка: {e}")
 
     def _show_all_students(self):

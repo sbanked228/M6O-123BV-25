@@ -37,3 +37,6 @@ class DuplicateIDError(StudentTableError):
 
 class RecordNotFoundError(StudentTableError):
     pass
+
+class FileOperationError(DatabaseError):
+    pass
