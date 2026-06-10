@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from .errors import TableAlreadyExistsError, TableNotFoundError
+from .errors import TableAlreadyExistsError
 from .table import Table
 
 

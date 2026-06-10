@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -8,6 +9,22 @@ from .table import Table
 
 
 class FileDatabase(Database):
+
+    def _validate_table_name(self, table_name: str) -> None:
+        if not table_name:
+            raise FileOperationError("Имя таблицы не может быть пустым.")
+        
+        forbidden = ['/', '\\', '..', '~', '.']
+        for char in forbidden:
+            if char in table_name:
+                raise FileOperationError(
+                    f"Недопустимый символ '{char}' в имени таблицы '{table_name}'."
+                )
+        
+        if not re.match(r'^[a-zA-Z0-9_]+$', table_name):
+            raise FileOperationError(
+                f"Имя таблицы '{table_name}' содержит недопустимые символы. "
+            )
 
     def __init__(self, directory: str = "data") -> None:
         self.directory = Path(directory)
@@ -19,6 +36,7 @@ class FileDatabase(Database):
             ) from error
     
     def _get_table_path(self, table_name: str) -> Path:
+        self._validate_table_name(table_name)
         return self.directory / f"{table_name}.json"
 
     def _table_exists(self, table_name: str) -> bool:
@@ -33,9 +51,11 @@ class FileDatabase(Database):
     def _deserialize_table(self, data: dict[str, Any]) -> Table:
         if "columns" not in data:
             raise InvalidStorageDataError(
+                "Файл таблицы не содержит обязательный ключ 'columns'."
             )
         if "records" not in data:
             raise InvalidStorageDataError(
+                "Файл таблицы не содержит обязательный ключ 'records'."
             )
         
         if not isinstance(data["columns"], list):

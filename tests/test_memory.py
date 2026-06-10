@@ -2,7 +2,6 @@ import unittest
 
 from src.db.backend.memory import MemoryDatabase
 from src.db.backend.errors import (
-    TableNotFoundError,
     TableAlreadyExistsError,
     MissingColumnError,
     UnknownColumnError,

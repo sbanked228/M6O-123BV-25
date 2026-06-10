@@ -1,6 +1,5 @@
 import tempfile
 import unittest
-import json
 from pathlib import Path
 
 from src.db.backend.file import FileDatabase
